@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#0f0e0c"/>
+<link rel="manifest" href="/histoflow/manifest.json"/>
+<title>HistoFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0e0c;--bg2:#1a1915;--bg3:#232118;--bg4:#2d2b24;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:#a07830;
+  --text:#e8e4d8;--text2:#a09880;--text3:#6a6458;
+  --border:#2d2b24;--border2:#3d3b30;
+  --red:#8b3a3a;--green:#3a6b3a;--blue:#3a5a8b;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden}
+h1,h2,h3,.serif{font-family:'Cinzel',serif}
+.playfair{font-family:'Playfair Display',serif}
+
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;position:relative}
+
+header{padding:20px 20px 0;flex-shrink:0}
+.logo{font-family:'Cinzel',serif;font-size:22px;font-weight:600;color:var(--gold);letter-spacing:2px}
+.logo span{color:var(--text2);font-size:13px;font-weight:400;font-family:'Inter',sans-serif;letter-spacing:1px;display:block;margin-top:2px}
+
+nav{display:flex;gap:4px;padding:16px 20px 0;flex-shrink:0}
+.nav-btn{flex:1;padding:10px 4px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;letter-spacing:.5px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav-btn.active{border-color:var(--gold3);background:rgba(201,168,76,.08);color:var(--gold)}
+.nav-btn .nav-icon{font-size:16px}
+
+#content{flex:1;overflow-y:auto;padding:16px 20px 90px;scroll-behavior:smooth}
+#content::-webkit-scrollbar{width:3px}
+#content::-webkit-scrollbar-track{background:transparent}
+#content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;transition:border-color .2s,transform .15s}
+.card:active{transform:scale(.99)}
+.card.active{border-color:var(--gold3)}
+.card-img{width:100%;height:120px;object-fit:cover;display:block;background:var(--bg3);filter:brightness(.7)}
+.card-img-placeholder{width:100%;height:80px;background:linear-gradient(135deg,var(--bg3),var(--bg4));display:flex;align-items:center;justify-content:center;font-size:28px}
+.card-body{padding:14px}
+.card-date{font-size:11px;color:var(--gold);font-family:'Cinzel',serif;letter-spacing:1px;margin-bottom:4px}
+.card-title{font-family:'Cinzel',serif;font-size:15px;color:var(--text);margin-bottom:6px;line-height:1.4}
+.card-desc{font-family:'Playfair Display',serif;font-size:13px;color:var(--text2);line-height:1.6;font-style:italic}
+.card-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg3)}
+.badge{font-size:10px;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.5px}
+
+.card-detail{padding:14px;border-top:1px solid var(--border);background:var(--bg3)}
+.card-detail p{font-family:'Playfair Display',serif;font-size:14px;line-height:1.7;color:var(--text2)}
+.card-detail-actions{display:flex;gap:8px;margin-top:12px}
+.btn-sm{padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.btn-sm:hover{border-color:var(--gold3);color:var(--gold)}
+.btn-sm.danger{color:var(--red);border-color:rgba(139,58,58,.4)}
+
+.timeline-wrap{position:relative;padding-left:20px}
+.timeline-line{position:absolute;left:6px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--gold3),var(--gold3),transparent);opacity:.4}
+.timeline-dot{position:absolute;left:-17px;top:18px;width:8px;height:8px;border-radius:50%;border:1px solid var(--gold3);background:var(--bg)}
+
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:all .2s}
+.filter-btn.active{border-color:var(--gold3);background:rgba(201,168,76,.1);color:var(--gold)}
+
+.search-wrap{position:relative;margin-bottom:16px}
+.search-wrap input{width:100%;padding:10px 14px 10px 38px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--gold3)}
+.search-wrap input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}
+
+.fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:26px;background:var(--gold);border:none;color:#0f0e0c;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(201,168,76,.3);z-index:50;transition:transform .15s}
+.fab:active{transform:scale(.94)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:flex-end;animation:fadeIn .2s}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-height:85vh;overflow-y:auto;animation:slideUp .25s ease-out}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 20px}
+.modal-title{font-family:'Cinzel',serif;font-size:16px;color:var(--gold);margin-bottom:20px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--text2);font-family:'Inter',sans-serif;letter-spacing:.5px;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--gold3)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-actions{display:flex;gap:10px;margin-top:20px}
+.btn-primary{flex:1;padding:12px;border-radius:10px;background:var(--gold);border:none;color:#0f0e0c;font-size:14px;font-weight:500;cursor:pointer;font-family:'Cinzel',serif;letter-spacing:.5px;transition:opacity .2s}
+.btn-primary:disabled{opacity:.4}
+.btn-secondary{flex:1;padding:12px;border-radius:10px;background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:14px;cursor:pointer;font-family:'Inter',sans-serif}
+
+.quiz-score{display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg2);border-radius:12px;border:1px solid var(--border);margin-bottom:20px}
+.score-num{font-family:'Cinzel',serif;font-size:24px;color:var(--gold)}
+.score-label{font-size:12px;color:var(--text2)}
+.quiz-question{font-family:'Playfair Display',serif;font-size:17px;line-height:1.6;color:var(--text);margin-bottom:20px;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border)}
+.quiz-options{display:flex;flex-direction:column;gap:10px}
+.quiz-opt{padding:14px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:14px;font-family:'Playfair Display',serif;cursor:pointer;text-align:left;transition:all .2s;line-height:1.5}
+.quiz-opt:active{transform:scale(.99)}
+.quiz-opt.correct{border-color:#3a6b3a;background:rgba(58,107,58,.15);color:#7ecb7e}
+.quiz-opt.wrong{border-color:#6b3a3a;background:rgba(107,58,58,.15);color:#cb7e7e}
+.quiz-result{margin-top:16px;text-align:center;padding:16px;border-radius:10px;font-family:'Playfair Display',serif;font-size:15px}
+
+.fiche-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:fadeIn .3s}
+.fiche-img{width:100%;height:150px;object-fit:cover;filter:brightness(.5)}
+.fiche-content{padding:16px}
+.fiche-title{font-family:'Cinzel',serif;font-size:18px;color:var(--gold);margin-bottom:4px}
+.fiche-period{font-size:12px;color:var(--text3);font-family:'Inter',sans-serif;letter-spacing:.5px;margin-bottom:12px}
+.fiche-resume{font-family:'Playfair Display',serif;font-size:14px;font-style:italic;color:var(--text2);line-height:1.7;border-left:2px solid var(--gold3);padding-left:12px;margin-bottom:16px}
+.fiche-section{margin-bottom:14px}
+.fiche-section-title{font-size:10px;letter-spacing:1.5px;color:var(--gold3);font-family:'Inter',sans-serif;font-weight:500;margin-bottom:8px;text-transform:uppercase}
+.fiche-point{display:flex;gap:8px;margin-bottom:6px;font-size:13px;color:var(--text2);font-family:'Playfair Display',serif;line-height:1.5}
+.fiche-point::before{content:'—';color:var(--gold3);flex-shrink:0}
+.fiche-chip{display:inline-block;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);font-size:12px;color:var(--text2);margin:3px;font-family:'Inter',sans-serif}
+
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-text{font-family:'Playfair Display',serif;font-size:15px;font-style:italic}
+
+.loading{text-align:center;padding:40px;color:var(--text3);font-family:'Playfair Display',serif;font-style:italic;font-size:15px}
+.loading::after{content:'';display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--gold3);border-radius:50%;animation:spin .8s linear infinite;margin-left:10px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.notif-banner{background:rgba(201,168,76,.1);border:1px solid var(--gold3);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.notif-text{font-size:13px;color:var(--gold2);font-family:'Playfair Display',serif;font-style:italic}
+.notif-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0;line-height:1}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-family:'Cinzel',serif;font-size:13px;color:var(--text2);letter-spacing:1.5px}
+.section-count{font-size:12px;color:var(--text3)}
+
+select.form-input option{background:var(--bg3)}
+textarea.form-input{resize:vertical;min-height:80px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">HISTOFLOW<span>Votre mémoire de l'Histoire</span></div>
+  </header>
+  <nav>
+    <button class="nav-btn active" onclick="showTab('timeline',this)"><span class="nav-icon">📜</span>Frise</button>
+    <button class="nav-btn" onclick="showTab('quiz',this)"><span class="nav-icon">⚔️</span>Quiz</button>
+    <button class="nav-btn" onclick="showTab('fiches',this)"><span class="nav-icon">📖</span>Fiches</button>
+  </nav>
+  <div id="content"></div>
+  <button class="fab" id="fab" onclick="openAddModal()">+</button>
+</div>
+<div id="modal-container"></div>
+
+<script>
+const PERIODS=["Antiquité","Moyen Âge","Époque moderne","Époque contemporaine"];
+const CATEGORIES=["Politique","Guerre","Culture","Science","Religion","Économie"];
+const PERIOD_ICONS={"Antiquité":"🏛","Moyen Âge":"⚔️","Époque moderne":"⛵","Époque contemporaine":"🏭"};
+const CAT_COLORS={"Politique":"#3a5a8b","Guerre":"#8b3a3a","Culture":"#3a6b3a","Science":"#534AB7","Religion":"#854F0B","Économie":"#0F6E56"};
+const UNSPLASH_QUERIES={"Antiquité":"ancient rome greece ruins","Moyen Âge":"medieval castle gothic","Époque moderne":"renaissance exploration age","Époque contemporaine":"industrial revolution modern history","Politique":"parliament ancient rome","Guerre":"medieval battle ancient war","Culture":"renaissance art museum","Science":"ancient astronomy science","Religion":"cathedral ancient temple","Économie":"silk road ancient trade"};
+
+let events=[
+  {id:1,title:"Fondation de Rome",date:-753,period:"Antiquité",category:"Politique",desc:"Selon la tradition, Romulus fonde la ville de Rome en 753 av. J.-C., établissant les bases de ce qui deviendra l'un des plus grands empires de l'Histoire.",image:"",link:""},
+  {id:2,title:"Bataille de Marathon",date:-490,period:"Antiquité",category:"Guerre",desc:"Les Athéniens repoussent l'invasion perse sous Darius Ier, défendant la liberté de la Grèce dans une bataille décisive.",image:"",link:""},
+  {id:3,title:"Chute de Rome",date:476,period:"Antiquité",category:"Politique",desc:"Romulus Augustule est déposé par Odoacre, marquant la fin de l'Empire romain d'Occident et l'entrée dans le Moyen Âge.",image:"",link:""},
+  {id:4,title:"Bataille de Hastings",date:1066,period:"Moyen Âge",category:"Guerre",desc:"Guillaume le Conquérant bat Harold II et conquiert l'Angleterre, transformant durablement la culture et la langue anglaises.",image:"",link:""},
+  {id:5,title:"Magna Carta",date:1215,period:"Moyen Âge",category:"Politique",desc:"Le roi Jean d'Angleterre signe la Grande Charte, posant les fondements des droits individuels et de la limitation du pouvoir royal.",image:"",link:""},
+  {id:6,title:"Chute de Constantinople",date:1453,period:"Moyen Âge",category:"Guerre",desc:"Mehmed II prend Constantinople après un siège de 53 jours, mettant fin à l'Empire byzantin millénaire.",image:"",link:""},
+  {id:7,title:"Découverte de l'Amérique",date:1492,period:"Époque moderne",category:"Science",desc:"Christophe Colomb débarque aux Amériques le 12 octobre, ouvrant une ère nouvelle d'exploration et de mondialisation.",image:"",link:""},
+  {id:8,title:"Révolution française",date:1789,period:"Époque contemporaine",category:"Politique",desc:"La prise de la Bastille marque le début d'une révolution qui bouleverse l'ordre politique européen et diffuse les idéaux de liberté et d'égalité.",image:"",link:""},
+  {id:9,title:"Première Guerre mondiale",date:1914,period:"Époque contemporaine",category:"Guerre",desc:"L'assassinat de François-Ferdinand déclenche le premier conflit mondial, faisant des millions de victimes et redessinant la carte de l'Europe.",image:"",link:""},
+  {id:10,title:"Alunissage Apollo 11",date:1969,period:"Époque contemporaine",category:"Science",desc:"Neil Armstrong et Buzz Aldrin marchent sur la Lune le 20 juillet, accomplissant l'un des exploits les plus remarquables de l'humanité.",image:"",link:""},
+];
+
+let currentTab="timeline";
+let filterPeriod="Toutes";
+let filterCat="Toutes";
+let searchQ="";
+let expandedId=null;
+let quizState={q:null,opts:[],chosen:null,score:{ok:0,total:0},loading:false};
+let ficheState={topic:"",fiche:null,loading:false};
+let notifDismissed=false;
+
+function formatDate(d){return d<0?`${Math.abs(d)} av. J.-C.`:`${d} ap. J.-C.`;}
+
+function getUnsplashUrl(period,category,title){
+  const q=encodeURIComponent(UNSPLASH_QUERIES[category]||UNSPLASH_QUERIES[period]||"ancient history");
+  const seed=Math.abs(title.split("").reduce((a,c)=>a+c.charCodeAt(0),0))%1000;
+  return `https://source.unsplash.com/400x200/?${q}&sig=${seed}`;
+}
+
+function showTab(tab,btn){
+  currentTab=tab;
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("fab").style.display=tab==="timeline"?"flex":"none";
+  render();
+}
+
+function render(){
+  const c=document.getElementById("content");
+  if(currentTab==="timeline") c.innerHTML=renderTimeline();
+  else if(currentTab==="quiz") c.innerHTML=renderQuiz();
+  else c.innerHTML=renderFiches();
+  attachListeners();
+}
+
+function renderTimeline(){
+  const filtered=events
+    .filter(e=>filterPeriod==="Toutes"||e.period===filterPeriod)
+    .filter(e=>filterCat==="Toutes"||e.category===filterCat)
+    .filter(e=>!searchQ||e.title.toLowerCase().includes(searchQ.toLowerCase())||e.desc.toLowerCase().includes(searchQ.toLowerCase()))
+    .sort((a,b)=>a.date-b.date);
+
+  let html=``;
+  if(!notifDismissed) html+=`<div class="notif-banner"><span class="notif-text">Activer les rappels d'apprentissage ?</span><button class="notif-close" onclick="requestNotif()">🔔</button></div>`;
+  html+=`<div class="search-wrap"><span class="search-icon">🔍</span><input type="text" placeholder="Rechercher un événement..." value="${searchQ}" oninput="searchQ=this.value;render()" /></div>`;
+  html+=`<div class="filters"><button class="filter-btn ${filterPeriod==="Toutes"?"active":""}" onclick="filterPeriod='Toutes';render()">Toutes</button>`;
+  PERIODS.forEach(p=>html+=`<button class="filter-btn ${filterPeriod===p?"active":""}" onclick="filterPeriod='${p}';render()">${PERIOD_ICONS[p]} ${p}</button>`);
+  html+=`</div>`;
+  html+=`<div class="section-header"><span class="section-title">ÉVÉNEMENTS</span><span class="section-count">${filtered.length} résultat${filtered.length>1?"s":""}</span></div>`;
+
+  if(filtered.length===0) return html+`<div class="empty"><div class="empty-icon">📜</div><div class="empty-text">Aucun événement ne correspond à votre recherche.</div></div>`;
+
+  html+=`<div class="timeline-wrap"><div class="timeline-line"></div>`;
+  filtered.forEach(ev=>{
+    const isOpen=expandedId===ev.id;
+    const imgUrl=getUnsplashUrl(ev.period,ev.category,ev.title);
+    const catColor=CAT_COLORS[ev.category]||"#888";
+    html+=`<div style="position:relative">
+      <div class="timeline-dot" style="border-color:${catColor};background:${catColor}22"></div>
+      <div class="card ${isOpen?"active":""}" onclick="expandedId=${isOpen?null:ev.id};render()">
+        ${isOpen?`<img class="card-img" src="${imgUrl}" alt="${ev.title}" onerror="this.style.display='none'" loading="lazy"/>`:`<div class="card-img-placeholder">${PERIOD_ICONS[ev.period]||"📜"}</div>`}
+        <div class="card-body">
+          <div class="card-date">${formatDate(ev.date)}</div>
+          <div class="card-title">${ev.title}</div>
+          ${isOpen?`<div class="card-desc">${ev.desc}</div>`:""}
+        </div>
+        <div class="card-footer">
+          <span class="badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}44">${ev.category}</span>
+          <span style="font-size:11px;color:var(--text3)">${ev.period}</span>
+        </div>
+        ${isOpen?`<div class="card-detail">
+          <div class="card-detail-actions">
+            <button class="btn-sm" onclick="event.stopPropagation();openEditModal(${ev.id})">✏️ Modifier</button>
+            <button class="btn-sm danger" onclick="event.stopPropagation();deleteEvent(${ev.id})">🗑 Supprimer</button>
+            ${ev.link?`<a href="${ev.link}" class="btn-sm" onclick="event.stopPropagation()" style="text-decoration:none">🔗 Lien</a>`:""}
+          </div>
+        </div>`:""}
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+
+function renderQuiz(){
+  const s=quizState;
+  let html=`<div class="quiz-score">
+    <div><div class="score-num">${s.score.ok}/${s.score.total}</div><div class="score-label">Score</div></div>
+    <div style="flex:1"></div>
+    <button class="btn-primary" style="flex:0;padding:10px 20px;font-size:13px" onclick="generateQuiz()" ${s.loading?"disabled":""}>
+      ${s.loading?"Génération...":"Nouvelle question"}
+    </button>
+  </div>`;
+
+  if(s.loading) return html+`<div class="loading">L'oracle consulte les archives</div>`;
+  if(!s.q) return html+`<div class="empty"><div class="empty-icon">⚔️</div><div class="empty-text">Testez vos connaissances historiques.<br/>Appuyez sur "Nouvelle question" pour commencer.</div></div>`;
+
+  html+=`<div class="quiz-question">${s.q.question}</div><div class="quiz-options">`;
+  s.opts.forEach(o=>{
+    let cls="";
+    if(s.chosen){cls=o===s.q.correct?"correct":o===s.chosen?"wrong":"";}
+    html+=`<button class="quiz-opt ${cls}" onclick="chooseAnswer('${o.replace(/'/g,"\\'")}') " ${s.chosen?"disabled":""}>${o}</button>`;
+  });
+  html+=`</div>`;
+  if(s.chosen){
+    const ok=s.chosen===s.q.correct;
+    html+=`<div class="quiz-result" style="background:${ok?"rgba(58,107,58,.15)":"rgba(107,58,58,.15)"};border:1px solid ${ok?"#3a6b3a":"#6b3a3a"}">
+      <div style="font-size:18px;margin-bottom:6px">${ok?"✓":"✗"}</div>
+      <div style="color:${ok?"#7ecb7e":"#cb7e7e"}">${ok?"Bonne réponse !":"La réponse était : "+s.q.correct}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px;font-style:italic">${s.q.eventDesc||""}</div>
+      <button class="btn-primary" style="margin-top:14px;padding:10px 24px;flex:0;display:inline-block;width:auto" onclick="generateQuiz()">Question suivante →</button>
+    </div>`;
+  }
+  return html;
+}
+
+function renderFiches(){
+  const s=ficheState;
+  let html=`<div style="margin-bottom:16px">
+    <div style="display:flex;gap:8px">
+      <input type="text" class="form-input" placeholder="Ex: Révolution française, César, Renaissance..." value="${s.topic}" oninput="ficheState.topic=this.value" style="flex:1" onkeydown="if(event.key==='Enter')generateFiche()"/>
+      <button class="btn-primary" style="flex:0;padding:10px 16px;white-space:nowrap;font-size:12px" onclick="generateFiche()" ${s.loading||!s.topic.trim()?"disabled":""}>Générer ✦</button>
+    </div>
+  </div>`;
+
+  if(s.loading) return html+`<div class="loading">Rédaction de la fiche en cours</div>`;
+  if(!s.fiche) return html+`<div class="empty"><div class="empty-icon">📖</div><div class="empty-text">Entrez un sujet historique pour générer une fiche de cours illustrée.</div></div>`;
+
+  const f=s.fiche;
+  const imgQ=encodeURIComponent(f.titre+" history ancient");
+  const seed=Math.abs(f.titre.split("").reduce((a,c)=>a+c.charCodeAt(0),0))%1000;
+  const imgUrl=`https://source.unsplash.com/400x150/?${imgQ}&sig=${seed}`;
+
+  html+=`<div class="fiche-card">
+    <img class="fiche-img" src="${imgUrl}" alt="${f.titre}" onerror="this.style.display='none'" loading="lazy"/>
+    <div class="fiche-content">
+      <div class="fiche-title">${f.titre}</div>
+      <div class="fiche-period">${f.periode}</div>
+      <div class="fiche-resume">${f.resume}</div>
+      <div class="fiche-section">
+        <div class="fiche-section-title">Points clés</div>
+        ${(f.points||[]).map(p=>`<div class="fiche-point">${p}</div>`).join("")}
+      </div>
+      <div class="fiche-section">
+        <div class="fiche-section-title">Figures importantes</div>
+        <div>${(f.figures||[]).map(fig=>`<span class="fiche-chip">${fig}</span>`).join("")}</div>
+      </div>
+      <div class="fiche-section">
+        <div class="fiche-section-title">Enjeux historiques</div>
+        <div style="font-family:'Playfair Display',serif;font-size:13px;color:var(--text2);line-height:1.6;font-style:italic">${f.enjeux}</div>
+      </div>
+    </div>
+  </div>`;
+  return html;
+}
+
+function attachListeners(){}
+
+function openAddModal(){openModal(null);}
+function openEditModal(id){openModal(events.find(e=>e.id===id));}
+
+function openModal(ev){
+  const isEdit=!!ev;
+  const form=ev||{id:null,title:"",date:"",period:"Antiquité",category:"Politique",desc:"",image:"",link:""};
+  document.getElementById("modal-container").innerHTML=`
+  <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">${isEdit?"Modifier l'événement":"Nouvel événement"}</div>
+      <div class="form-group"><label class="form-label">TITRE</label><input id="f-title" class="form-input" value="${form.title}"/></div>
+      <div class="form-group"><label class="form-label">DATE (ex: 1789 ou -753)</label><input id="f-date" class="form-input" value="${form.date}"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">PÉRIODE</label>
+          <select id="f-period" class="form-input">${PERIODS.map(p=>`<option ${p===form.period?"selected":""}>${p}</option>`).join("")}</select>
+        </div>
+        <div class="form-group"><label class="form-label">CATÉGORIE</label>
+          <select id="f-cat" class="form-input">${CATEGORIES.map(c=>`<option ${c===form.category?"selected":""}>${c}</option>`).join("")}</select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">DESCRIPTION</label><textarea id="f-desc" class="form-input">${form.desc}</textarea></div>
+      <div class="form-group"><label class="form-label">LIEN EXTERNE (optionnel)</label><input id="f-link" class="form-input" value="${form.link}"/></div>
+      <div class="form-actions">
+        <button class="btn-secondary" onclick="closeModal()">Annuler</button>
+        <button class="btn-primary" onclick="saveEvent(${form.id||'null'})">Enregistrer</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function closeModal(){document.getElementById("modal-container").innerHTML="";}
+
+function saveEvent(id){
+  const title=document.getElementById("f-title").value.trim();
+  const dateStr=document.getElementById("f-date").value.trim();
+  const date=parseInt(dateStr);
+  if(!title){alert("Le titre est requis.");return;}
+  if(isNaN(date)){alert("Date invalide.");return;}
+  const ev={id:id||Date.now(),title,date,period:document.getElementById("f-period").value,category:document.getElementById("f-cat").value,desc:document.getElementById("f-desc").value.trim(),image:"",link:document.getElementById("f-link").value.trim()};
+  if(id) events=events.map(e=>e.id===id?ev:e);
+  else events.push(ev);
+  closeModal();render();
+}
+
+async function generateQuiz(){
+  if(events.length<4){alert("Ajoutez au moins 4 événements pour générer un quiz.");return;}
+  quizState={...quizState,loading:true,q:null,chosen:null};render();
+  const sample=[...events].sort(()=>Math.random()-.5).slice(0,6);
+  const correct=sample[0];
+  const prompt=`Quiz historique. Événement : "${correct.title} (${formatDate(correct.date)})". Génère une question à choix multiple, bonne réponse "${correct.title}", 3 mauvaises parmi : ${sample.slice(1).map(e=>e.title).join(", ")}. JSON uniquement sans markdown: {"question":"...","correct":"${correct.title}","options":["...","...","...","..."],"eventDesc":"${correct.desc.substring(0,80)}..."}`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    let txt=data.content?.map(c=>c.text||"").join("").trim().replace(/```json|```/g,"").trim();
+    const parsed=JSON.parse(txt);
+    const shuffled=[...parsed.options].sort(()=>Math.random()-.5);
+    quizState={...quizState,loading:false,q:parsed,opts:shuffled};
+  }catch(e){quizState={...quizState,loading:false};alert("Erreur de génération.");}
+  render();
+}
+
+function chooseAnswer(opt){
+  if(quizState.chosen) return;
+  quizState.chosen=opt;
+  quizState.score={ok:quizState.score.ok+(opt===quizState.q.correct?1:0),total:quizState.score.total+1};
+  render();
+}
+
+async function generateFiche(){
+  const topic=ficheState.topic.trim();
+  if(!topic) return;
+  ficheState={...ficheState,loading:true,fiche:null};render();
+  const related=events.filter(e=>e.title.toLowerCase().includes(topic.toLowerCase())||e.period.toLowerCase().includes(topic.toLowerCase()));
+  const ctx=related.length?`\nÉvénements liés : ${related.map(e=>e.title).join(", ")}`:"";
+  const prompt=`Fiche de cours historique sur "${topic}".${ctx}\nJSON uniquement sans markdown : {"titre":"...","periode":"...","resume":"2-3 phrases","points":["point 1","point 2","point 3","point 4"],"figures":["figure 1","figure 2","figure 3"],"enjeux":"1 phrase"}`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    let txt=data.content?.map(c=>c.text||"").join("").trim().replace(/```json|```/g,"").trim();
+    ficheState={...ficheState,loading:false,fiche:JSON.parse(txt)};
+  }catch(e){ficheState={...ficheState,loading:false};alert("Erreur de génération.");}
+  render();
+}
+
+function requestNotif(){
+  if("Notification" in window){
+    Notification.requestPermission().then(p=>{
+      if(p==="granted"){
+        new Notification("HistoFlow",{body:"Les rappels d'apprentissage sont activés ✓",icon:""});
+      }
+    });
+  }
+  notifDismissed=true;render();
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/histoflow/sw.js');
+}
+
+render();
+</script>
+</body>
+</html>
